@@ -1,0 +1,77 @@
+﻿@page
+@model PrivacyModel
+@{
+    ViewData["Title"] = "Registrar nuevo participante";
+}
+<div class="parent">
+    <div class="div1 d-flex align-items-center justify-content-end">
+        <img src="~/images/weeCompany.PNG" class="img-fluid logo" alt="Logo">
+    </div>
+
+    <div class="div2">
+        <div class="card formulario-col">
+            <div class="card-body">
+                <h2 class="card-title mb-3">Registro</h2>
+
+                <form id="registroForm" method="post" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control" required>
+                        <div class="invalid-feedback">Por favor introduce tu nombre.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo electrónico</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                        <div class="invalid-feedback">Introduce un correo válido.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contrasena" class="form-label">Contraseña</label>
+                        <input type="password" id="contrasena" name="contrasena" class="form-control" required minlength="6">
+                        <div class="form-text">Mínimo 6 caracteres.</div>
+                        <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirmarContrasena" class="form-label">Confirmar contraseña</label>
+                        <input type="password" id="confirmarContrasena" name="confirmarContrasena" class="form-control" required minlength="6">
+                        <div class="invalid-feedback">Las contraseñas deben coincidir.</div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Registrarse</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Validación mínima con Bootstrap
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    // validación simple de coincidencia de contraseña
+                    var pwd = form.querySelector('#contrasena');
+                    var pwd2 = form.querySelector('#confirmarContrasena');
+                    if (pwd && pwd2 && pwd.value !== pwd2.value) {
+                        pwd2.setCustomValidity('No coincide');
+                    } else if (pwd2) {
+                        pwd2.setCustomValidity('');
+                    }
+
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+}
