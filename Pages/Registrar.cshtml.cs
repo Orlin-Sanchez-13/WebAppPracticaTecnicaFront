@@ -33,14 +33,14 @@ namespace WebAppPractica.Pages
 
             if (result.Success)
             {
-                TempData["ResultMessage"] = result.Message ?? "Participante registrado correctamente.";
+                TempData["ResultMessage"] = result.Message ?? "Datos Guardados correctamente.";
             }
             else
             {
                 if (result.FieldErrors?.Count > 0)
                 {
                     TempData["ResultErrors"] = JsonSerializer.Serialize(result.FieldErrors);
-                    TempData["ResultMessage"] = "Revisa los campos marcados.";
+                    TempData["ResultMessage"] = "ERROR - Revisa los campos marcados.";
                 }
                 else
                 {
