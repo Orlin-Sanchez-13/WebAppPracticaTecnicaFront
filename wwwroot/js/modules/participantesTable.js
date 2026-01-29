@@ -11,6 +11,7 @@ export class ParticipantesTable {
             compania: p.nombreCompania,
             cedula: p.cedula,
             contacto: p.nombreContacto,
+            titulo: p.titulo,
             correo: p.correo,
             telefono: p.telefono
         }));
@@ -22,6 +23,7 @@ export class ParticipantesTable {
             <td>${registro.compania}</td>
             <td>${registro.cedula}</td>
             <td>${registro.contacto}</td>
+            <td>${registro.titulo}</td>
             <td>${registro.correo}</td>
             <td>${registro.telefono}</td>
         `;

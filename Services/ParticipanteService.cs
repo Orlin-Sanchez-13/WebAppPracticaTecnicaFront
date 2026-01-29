@@ -64,4 +64,124 @@ public class ParticipanteService : IParticipanteService
             return Enumerable.Empty<ParticipanteDto>();
         }
     }
+
+    public async Task<RegistroParticipanteResultado> RegistrarParticipanteAsync(ParticipanteDto participante)
+    {
+        try
+        {
+            var endpoint = $"{_apiSettings.ApiBackend}{_pathsConfig.PathPrincipal}{_pathsConfig.RegistroParticipantes}";
+            var content = new StringContent(JsonSerializer.Serialize(participante), System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(endpoint, content);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogInformation("Participante registrado correctamente.");
+                return new RegistroParticipanteResultado
+                {
+                    Success = true,
+                    Message = "Participante registrado correctamente.",
+                    Data = participante
+                };
+            }
+
+            var fieldErrors = TryParseFieldErrors(body);
+            var generalError = TryParseGeneralError(body);
+
+            _logger.LogWarning("Error al registrar participante. Respuesta: {Body}", body);
+
+            return new RegistroParticipanteResultado
+            {
+                Success = false,
+                Message = "No se pudo registrar el participante.",
+                Data = participante,
+                FieldErrors = fieldErrors,
+                GeneralError = generalError,
+                RawErrorJson = body
+            };
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error HTTP al registrar participante. Mensaje: {Message}", ex.Message);
+            return new RegistroParticipanteResultado
+            {
+                Success = false,
+                Message = "Error de comunicación con el servicio.",
+                Data = participante,
+                GeneralError = ex.Message
+            };
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Error JSON al serializar el participante. Mensaje: {Message}", ex.Message);
+            return new RegistroParticipanteResultado
+            {
+                Success = false,
+                Message = "Error al procesar los datos enviados.",
+                Data = participante,
+                GeneralError = ex.Message
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error inesperado al registrar participante. Tipo: {Type}, Mensaje: {Message}", ex.GetType().Name, ex.Message);
+            return new RegistroParticipanteResultado
+            {
+                Success = false,
+                Message = "Error inesperado al registrar.",
+                Data = participante,
+                GeneralError = ex.Message
+            };
+        }
+    }
+
+    private static Dictionary<string, string[]>? TryParseFieldErrors(string body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            return null;
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<Dictionary<string, string[]>>(body, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string? TryParseGeneralError(string body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            if (doc.RootElement.ValueKind == JsonValueKind.String)
+            {
+                return doc.RootElement.GetString();
+            }
+
+            if (doc.RootElement.ValueKind == JsonValueKind.Object &&
+                doc.RootElement.TryGetProperty("message", out var messageElement) &&
+                messageElement.ValueKind == JsonValueKind.String)
+            {
+                return messageElement.GetString();
+            }
+        }
+        catch
+        {
+            return body;
+        }
+
+        return body;
+    }
 }

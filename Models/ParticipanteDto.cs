@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace WebAppPractica.Models;
 
 public class ParticipanteDto
