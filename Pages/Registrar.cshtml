@@ -2,6 +2,14 @@
 @model PrivacyModel
 @{
     ViewData["Title"] = "Registrar nuevo participante";
+    var resultStatus = TempData["ResultStatus"] as string;
+    var resultMessage = TempData["ResultMessage"] as string;
+    var resultData = TempData["ResultData"] as string;
+    var resultErrors = TempData["ResultErrors"] as string;
+    var resultRaw = TempData["ResultRaw"] as string;
+    var headerClass = resultStatus == "success"
+        ? "bg-success text-white"
+        : resultStatus == "error" ? "bg-danger text-white" : "";
 }
 <div class="parent">
     <div class="div1 d-flex align-items-center justify-content-end">
@@ -11,36 +19,41 @@
     <div class="div2">
         <div class="card formulario-col">
             <div class="card-body">
-                <h2 class="card-title mb-3">Registro</h2>
-
-                <form id="registroForm" method="post" class="needs-validation" novalidate>
+                <h2 class="card-title mb-3 registro-title">Registro para participantes</h2>
+                <form id="registroForm" method="post">
                     <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <input type="text" id="nombre" name="nombre" class="form-control" required>
-                        <div class="invalid-feedback">Por favor introduce tu nombre.</div>
+                        <input asp-for="Participante.NombreCompania" class="form-control" placeholder="Nombre de la compañía">
                     </div>
 
                     <div class="mb-3">
-                        <label for="email" class="form-label">Correo electrónico</label>
-                        <input type="email" id="email" name="email" class="form-control" required>
-                        <div class="invalid-feedback">Introduce un correo válido.</div>
+                        <input asp-for="Participante.Cedula" class="form-control" placeholder="Cédula" autocomplete="off">
                     </div>
 
                     <div class="mb-3">
-                        <label for="contrasena" class="form-label">Contraseña</label>
-                        <input type="password" id="contrasena" name="contrasena" class="form-control" required minlength="6">
-                        <div class="form-text">Mínimo 6 caracteres.</div>
-                        <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+                        <input asp-for="Participante.NombreContacto" class="form-control" placeholder="Nombre de la persona para contacto">
                     </div>
 
                     <div class="mb-3">
-                        <label for="confirmarContrasena" class="form-label">Confirmar contraseña</label>
-                        <input type="password" id="confirmarContrasena" name="confirmarContrasena" class="form-control" required minlength="6">
-                        <div class="invalid-feedback">Las contraseñas deben coincidir.</div>
+                        <input asp-for="Participante.Titulo" class="form-control" placeholder="Título">
+                    </div>
+
+                    <div class="mb-3">
+                        <input asp-for="Participante.Correo" class="form-control" placeholder="Correo">
+                    </div>
+
+                    <div class="mb-3">
+                        <input asp-for="Participante.Telefono" class="form-control" placeholder="Teléfono" inputmode="numeric" autocomplete="off">
+                    </div>
+
+                    <div class="form-check mb-3 registro-check">
+                        <input class="form-check-input" type="checkbox" id="aceptaTerminos">
+                        <label for="aceptaTerminos">
+                            <h6 class="registro-check-text">He leído y acepto el <a href=""> Aviso de privacidad/Términos y condiciones </a></h6>
+                        </label>
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">Registrarse</button>
+                        <button type="submit" id="btnRegistrar" class="btn btn-primary btn-lg" disabled>Continuar</button>
                     </div>
                 </form>
             </div>
@@ -48,30 +61,101 @@
     </div>
 </div>
 
+<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header @headerClass">
+                <h5 class="modal-title" id="resultModalLabel"> <center> <p id="resultMessage">@resultMessage</p> </center></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="resultData" class="mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        // Validación mínima con Bootstrap
-        (function () {
-            'use strict'
-            var forms = document.querySelectorAll('.needs-validation')
-            Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    // validación simple de coincidencia de contraseña
-                    var pwd = form.querySelector('#contrasena');
-                    var pwd2 = form.querySelector('#confirmarContrasena');
-                    if (pwd && pwd2 && pwd.value !== pwd2.value) {
-                        pwd2.setCustomValidity('No coincide');
-                    } else if (pwd2) {
-                        pwd2.setCustomValidity('');
+        document.addEventListener('DOMContentLoaded', function () {
+            var form = document.getElementById('registroForm');
+            var submitBtn = document.getElementById('btnRegistrar');
+            var inputs = form.querySelectorAll('input.form-control');
+            var termsCheck = document.getElementById('aceptaTerminos');
+
+            function updateSubmitState() {
+                var allFilled = Array.prototype.every.call(inputs, function (input) {
+                    return input.value.trim().length > 0;
+                });
+                var termsOk = termsCheck && termsCheck.checked;
+                submitBtn.disabled = !(allFilled && termsOk);
+            }
+
+            inputs.forEach(function (input) {
+                input.addEventListener('input', updateSubmitState);
+                input.addEventListener('change', updateSubmitState);
+            });
+
+            if (termsCheck) {
+                termsCheck.addEventListener('change', updateSubmitState);
+            }
+
+            updateSubmitState();
+
+            var resultStatus = "@resultStatus";
+            var resultData = @Html.Raw(string.IsNullOrWhiteSpace(resultData) ? "null" : resultData);
+            var resultErrors = @Html.Raw(string.IsNullOrWhiteSpace(resultErrors) ? "null" : resultErrors);
+
+            if (!resultStatus) {
+                return;
+            }
+
+            var dataContainer = document.getElementById('resultData');
+            if (resultData) {
+                var fieldRows = [
+                    { key: 'NombreCompania', label: 'Compañía', value: resultData.NombreCompania },
+                    { key: 'Cedula', label: 'Cédula', value: resultData.Cedula },
+                    { key: 'NombreContacto', label: 'Contacto', value: resultData.NombreContacto },
+                    { key: 'Titulo', label: 'Título', value: resultData.Titulo },
+                    { key: 'Correo', label: 'Correo', value: resultData.Correo },
+                    { key: 'Telefono', label: 'Teléfono', value: resultData.Telefono }
+                ];
+
+                fieldRows.forEach(function (field) {
+                    var errorMessages = resultErrors && resultErrors[field.key] ? resultErrors[field.key] : null;
+
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'mb-2';
+
+                    var label = document.createElement('div');
+                    label.className = errorMessages ? 'fw-semibold text-danger' : 'fw-semibold';
+                    label.textContent = field.label;
+
+                    var value = document.createElement('div');
+                    value.className = errorMessages ? 'text-danger' : '';
+                    value.textContent = field.value ?? '';
+
+                    wrapper.appendChild(label);
+                    wrapper.appendChild(value);
+
+                    if (errorMessages) {
+                        var msg = document.createElement('div');
+                        msg.className = 'text-danger small';
+                        msg.textContent = errorMessages.join(' ');
+                        wrapper.appendChild(msg);
                     }
 
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
+                    dataContainer.appendChild(wrapper);
+                });
+            } else {
+                dataContainer.classList.add('d-none');
+            }
+
+            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            modal.show();
+        });
     </script>
 }

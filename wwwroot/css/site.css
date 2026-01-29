@@ -2,6 +2,7 @@
     --color-primary: #258cfb;
     --color-primary-dark: #1d6fd0;
     --color-secondary: #6c757d;
+    --color-secondary-blue: #1d6fd0;
     --bg-default: transparent;
     --body-margin: 60px;
     --gap-min: 1rem;
@@ -147,4 +148,63 @@ body {
 img {
     max-width: 100%;
     height: auto
+}
+
+.registro-title {
+    color: var(--color-secondary-blue);
+    font-size: 1.05rem;
+}
+.registro-title2 {
+    color: var(--color-secondary-blue);
+    font-size: 1.5rem;
+}
+.registro-input {
+    max-width: 420px;
+    width: 100%;
+    min-height: 48px;
+}
+
+.registro-check {
+    max-width: 420px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+.registro-check .form-check-input {
+    transform: scale(0.9);
+}
+
+.registro-check-text {
+    margin: 0;
+    font-size: 0.625rem;
+    white-space: nowrap;
+}
+
+.parent-consulta {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+}
+
+.parent-consulta .div1,
+.parent-consulta .div2 {
+    flex: 0 0 auto;
+}
+
+.parent-consulta .div2 {
+    max-width: calc(100% - var(--logo-max-width) - var(--gap-fluid));
+    width: 100%;
+}
+
+@media (max-width:991.98px) {
+    .parent-consulta {
+        flex-wrap: wrap;
+    }
+
+    .parent-consulta .div1,
+    .parent-consulta .div2 {
+        max-width: 100%;
+    }
 }
