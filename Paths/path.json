@@ -1,0 +1,6 @@
+{
+  "pathPrincipal": "api/",
+  "conecctionBD": "connection/validate",
+  "listadoParticipantes": "v2/participants",
+  "registroParticipantes": "v2/participants"
+}

@@ -1,7 +1,17 @@
+using WebAppPractica.Models;
+using WebAppPractica.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorPages();
+
+builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+
+var pathsConfigPath = Path.Combine(builder.Environment.ContentRootPath, "Paths", "path.json");
+var pathsConfig = new ConfigurationBuilder().AddJsonFile(pathsConfigPath, optional: false, reloadOnChange: true).Build();
+builder.Services.Configure<PathsConfig>(pathsConfig);
+
+builder.Services.AddHttpClient<IParticipanteService, ParticipanteService>();
 
 var app = builder.Build();
 
@@ -9,7 +19,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
