@@ -48,7 +48,7 @@
                     <div class="form-check mb-3 registro-check">
                         <input class="form-check-input" type="checkbox" id="aceptaTerminos">
                         <label for="aceptaTerminos">
-                            <h6 class="registro-check-text">He leído y acepto el <a href=""> Aviso de privacidad/Términos y condiciones </a></h6>
+                            <h6 class="registro-check-text">He leído y acepto el <a href="#"> Aviso de privacidad/Términos y condiciones </a></h6>
                         </label>
                     </div>
 
@@ -80,82 +80,12 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var form = document.getElementById('registroForm');
-            var submitBtn = document.getElementById('btnRegistrar');
-            var inputs = form.querySelectorAll('input.form-control');
-            var termsCheck = document.getElementById('aceptaTerminos');
-
-            function updateSubmitState() {
-                var allFilled = Array.prototype.every.call(inputs, function (input) {
-                    return input.value.trim().length > 0;
-                });
-                var termsOk = termsCheck && termsCheck.checked;
-                submitBtn.disabled = !(allFilled && termsOk);
-            }
-
-            inputs.forEach(function (input) {
-                input.addEventListener('input', updateSubmitState);
-                input.addEventListener('change', updateSubmitState);
-            });
-
-            if (termsCheck) {
-                termsCheck.addEventListener('change', updateSubmitState);
-            }
-
-            updateSubmitState();
-
-            var resultStatus = "@resultStatus";
-            var resultData = @Html.Raw(string.IsNullOrWhiteSpace(resultData) ? "null" : resultData);
-            var resultErrors = @Html.Raw(string.IsNullOrWhiteSpace(resultErrors) ? "null" : resultErrors);
-
-            if (!resultStatus) {
-                return;
-            }
-
-            var dataContainer = document.getElementById('resultData');
-            if (resultData) {
-                var fieldRows = [
-                    { key: 'NombreCompania', label: 'Compañía', value: resultData.NombreCompania },
-                    { key: 'Cedula', label: 'Cédula', value: resultData.Cedula },
-                    { key: 'NombreContacto', label: 'Contacto', value: resultData.NombreContacto },
-                    { key: 'Titulo', label: 'Título', value: resultData.Titulo },
-                    { key: 'Correo', label: 'Correo', value: resultData.Correo },
-                    { key: 'Telefono', label: 'Teléfono', value: resultData.Telefono }
-                ];
-
-                fieldRows.forEach(function (field) {
-                    var errorMessages = resultErrors && resultErrors[field.key] ? resultErrors[field.key] : null;
-
-                    var wrapper = document.createElement('div');
-                    wrapper.className = 'mb-2';
-
-                    var label = document.createElement('div');
-                    label.className = errorMessages ? 'fw-semibold text-danger' : 'fw-semibold';
-                    label.textContent = field.label;
-
-                    var value = document.createElement('div');
-                    value.className = errorMessages ? 'text-danger' : '';
-                    value.textContent = field.value ?? '';
-
-                    wrapper.appendChild(label);
-                    wrapper.appendChild(value);
-
-                    if (errorMessages) {
-                        var msg = document.createElement('div');
-                        msg.className = 'text-danger small';
-                        msg.textContent = errorMessages.join(' ');
-                        wrapper.appendChild(msg);
-                    }
-
-                    dataContainer.appendChild(wrapper);
-                });
-            } else {
-                dataContainer.classList.add('d-none');
-            }
-
-            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-            modal.show();
-        });
+        window.registrarData = {
+            resultStatus: "@resultStatus",
+            resultData: @Html.Raw(string.IsNullOrWhiteSpace(resultData) ? "null" : resultData),
+            resultErrors: @Html.Raw(string.IsNullOrWhiteSpace(resultErrors) ? "null" : resultErrors),
+            consultaUrl: "@Url.Page("Consulta")"
+        };
     </script>
+    <script src="~/js/pages/registrar.js" asp-append-version="true"></script>
 }
